@@ -30,11 +30,13 @@ type MergeSuite struct {
 	suite.Suite
 	intMerge    *Merge
 	structMerge *Merge
+	stringMerge *Merge
 }
 
 func (suite *MergeSuite) BeforeTest(suiteName, testName string) {
 	suite.intMerge = NewMerge()
 	suite.structMerge = NewMerge()
+	suite.stringMerge = NewMerge()
 }
 
 func (suite *MergeSuite) Test_IntMerge() {
@@ -48,14 +50,24 @@ func (suite *MergeSuite) Test_IntMerge() {
 	assert.Len(suite.T(), actual.Value(), 5)
 }
 
-func (suite *MergeSuite) Test_StringMerge() {
-	suite.intMerge.Append("tom", "kitty")
-	suite.intMerge.Append("kitty", "darwin")
-	suite.intMerge.Append("tom", "windows", "linux")
-	suite.intMerge.Append("darwin", "windows")
+func (suite *MergeSuite) Test_StringMerge_Normal() {
+	suite.stringMerge.Append("tom", "kitty")
+	suite.stringMerge.Append("kitty", "darwin")
+	suite.stringMerge.Append("tom", "windows", "linux")
+	suite.stringMerge.Append("darwin", "windows")
 
-	actual := suite.intMerge.Merged(HandlerStringFunc)
+	actual := suite.stringMerge.Merged(HandlerStringFunc)
 	assert.Len(suite.T(), actual.Value(), 5)
+}
+
+func (suite *MergeSuite) Test_StringMerge_ContainsNil() {
+	var nilSlice []interface{}
+
+	suite.stringMerge.Append(nilSlice...)
+	suite.stringMerge.Append("hello")
+
+	actual := suite.stringMerge.Merged(HandlerStringFunc)
+	assert.Len(suite.T(), actual.Value(), 1)
 }
 
 type _student struct {
